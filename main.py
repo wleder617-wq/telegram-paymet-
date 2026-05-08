@@ -470,7 +470,7 @@ def start_keyboard(user_id=None):
     heart_emoji_id = PREMIUM_EMOJIS.get('HEART_RED')
 
     # Row 1: Join Group (Full Width)
-    keyboard.add(types.InlineKeyboardButton(text="Join Group 🚀", url="https://t.me/+_U7Ve8BeTaVjY2Y1"))
+    keyboard.add(types.InlineKeyboardButton(text="Join Group 🚀", url="https://t.me/+ARG5VlNBj4NhYWE0"))
 
     # Row 2: Mega Pack (Full Width)
     keyboard.add(styled_button(text="175,000 Videos 💎 5000 Stars", callback_data="buy_175000", style="success", emoji_id=star_emoji_id))
@@ -521,10 +521,7 @@ def start_keyboard(user_id=None):
         styled_button(text=get_string('leaderboard', lang), callback_data="leaderboard", style="primary", emoji_id=star_emoji_id)
     )
 
-    # Row 8: Generate Image
-    keyboard.add(styled_button(text="🎨 Generate Image — 3 Stars", callback_data="gen_image", style="primary"))
-
-    # Row 9: Language
+    # Row 8: Language
     keyboard.add(types.InlineKeyboardButton("Language 🌐", callback_data="change_lang"))
 
     if user_id and is_admin(user_id):
@@ -808,102 +805,6 @@ def handle_leaderboard(call):
     except:
         try: bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=keyboard)
         except: pass
-
-IMAGE_STYLES = {
-    "realistic": {
-        "label": "🖼️ Realistic",
-        "prompt": "cat nice, high quality realistic photo, ultra detailed, 8k resolution, professional photography, sharp focus, masterpiece"
-    },
-    "drawing": {
-        "label": "✏️ Drawing",
-        "prompt": "cat nice, beautiful pencil sketch drawing, detailed line art, high quality illustration, artistic, intricate details, professional artwork"
-    },
-    "fantasy": {
-        "label": "🔮 Fantasy",
-        "prompt": "cat nice, epic fantasy art, magical atmosphere, mystical, ethereal lighting, detailed, vibrant colors, high quality digital art, masterpiece"
-    },
-    "anime": {
-        "label": "🌸 Anime",
-        "prompt": "cat nice, high quality anime art style, detailed, vibrant colors, japanese animation, beautiful, professional anime illustration, 4k"
-    },
-}
-
-@bot.callback_query_handler(func=lambda call: call.data == "gen_image")
-def handle_gen_image_menu(call):
-    keyboard = types.InlineKeyboardMarkup(row_width=2)
-    btns = [types.InlineKeyboardButton(v["label"], callback_data=f"img_style_{k}") for k, v in IMAGE_STYLES.items()]
-    keyboard.add(*btns)
-    keyboard.add(types.InlineKeyboardButton("🏠 Main Menu", callback_data="back_to_start"))
-    try:
-        bot.edit_message_text(
-            "🎨 <b>Choose Your Image Style</b>\n\n"
-            "Each image costs <b>3 Stars</b> ⭐\n"
-            "Pick a style and generate instantly!",
-            call.message.chat.id,
-            call.message.message_id,
-            reply_markup=keyboard,
-            parse_mode='HTML'
-        )
-    except:
-        bot.send_message(
-            call.message.chat.id,
-            "🎨 <b>Choose Your Image Style</b>\n\n"
-            "Each image costs <b>3 Stars</b> ⭐\n"
-            "Pick a style and generate instantly!",
-            reply_markup=keyboard,
-            parse_mode='HTML'
-        )
-
-@bot.callback_query_handler(func=lambda call: call.data.startswith("img_style_"))
-def handle_image_style_select(call):
-    style = call.data.replace("img_style_", "")
-    if style not in IMAGE_STYLES:
-        bot.answer_callback_query(call.id, "Unknown style.")
-        return
-    style_info = IMAGE_STYLES[style]
-    try: bot.delete_message(call.message.chat.id, call.message.message_id)
-    except: pass
-    bot.send_invoice(
-        call.message.chat.id,
-        title=f"🎨 AI Image — {style_info['label']}",
-        description=f"Generate a {style_info['label']} style image instantly!",
-        invoice_payload=f"generate_image_{call.from_user.id}_{style}",
-        provider_token="",
-        currency="XTR",
-        prices=[types.LabeledPrice(label="AI Image", amount=3)]
-    )
-
-def generate_image_from_api(style="realistic"):
-    import requests as req
-    import json as js
-    prompt = IMAGE_STYLES.get(style, IMAGE_STYLES["realistic"])["prompt"]
-    url = "https://websim.com/api/v1/inference/run_image_generation"
-    payload = {
-        "project_id": "ypbe3b8pmpjj4_3265_g",
-        "prompt": prompt,
-        "width": 1024,
-        "height": 1024,
-        "aspect_ratio": "1:1",
-        "seed": 913001
-    }
-    headers = {
-        'User-Agent': "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
-        'Content-Type': "application/json",
-        'sec-ch-ua': '"Chromium";v="137", "Not/A)Brand";v="24"',
-        'sec-ch-ua-mobile': "?1",
-        'websim-flags': "",
-        'sec-ch-ua-platform': '"Android"',
-        'origin': "https://websim.com",
-        'sec-fetch-site': "same-origin",
-        'sec-fetch-mode': "cors",
-        'sec-fetch-dest': "empty",
-        'referer': "https://websim.com/@VIP_/simple-img-maker",
-        'accept-language': "ar-EG,ar;q=0.9,en-US;q=0.8,en;q=0.7",
-        'Cookie': "theme=auto; nosleep=0; ph_phc_VHMOlrdxAbgSZHeF0SdSf07LZLRLAg5pZuTHkJGn050_posthog=%7B%22distinct_id%22%3A%22663c0a60-c422-432a-8b0d-ab5eda631e88%22%2C%22%24sesid%22%3A%5B1775219944435%2C%22019d5358-9179-7e6a-8e62-1ce07f62b350%22%2C1775219806585%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fwebsim.com%2F%40Trey6383%2Ffree-nanobanana-pro%22%7D%7D"
-    }
-    resp = req.post(url, data=js.dumps(payload), headers=headers, timeout=30)
-    data = resp.json()
-    return data.get("url")
 
 @bot.callback_query_handler(func=lambda call: call.data == "none")
 def handle_none(call):
